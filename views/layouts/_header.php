@@ -7,6 +7,7 @@ declare(strict_types=1);
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
 use yii\helpers\Html;
+/** @var app\models\User[] $user */
 
 $items = [
     // [
@@ -65,7 +66,7 @@ $items = [
     <div class="d-flex justify-content-between align-items-center w-100">
 
         <!-- Left Side: Brand + Search -->
-        <div class="d-flex align-items-center">
+        <div class="d-flex align-items-center gap-3">
             <?= Html::a(
                 '<strong class="fs-3 p-2 rounded bg-black text-white">DEV TO</strong>',
                 Yii::$app->homeUrl,
@@ -76,14 +77,92 @@ $items = [
                 <input class="form-control" type="search" name="q" placeholder="Search articles..." aria-label="Search"
                     style="width:350px;">
             </form>
+            <?= Html::a(
+                '<i class="bi bi-bookmarks-fill"></i> My Bookmarks',
+                ['bookmark/index'],
+                [
+                    'class' => 'btn btn-outline-primary',
+                    'encode' => false,
+                ]
+            ) ?>
         </div>
 
         <!-- Right Side: Nav + Theme Toggle -->
         <div class="d-flex align-items-center gap-1">
-            <?= Nav::widget([
-                'options' => ['class' => 'navbar-nav'],
-                'items' => $items,
-            ]) ?>
+            <?php if (Yii::$app->user->isGuest): ?>
+            <div class="">
+                <?= Html::a(
+                    '<i class="bi bi-plus-circle"></i> Create Account',
+                    ['register/index'],
+                    [
+                        'class' => 'btn btn-primary',
+                        'encode' => false,
+                    ]
+            ) ?>
+                <?= Html::a(
+                    '<i class="bi bi-plus-circle"></i> Login',
+                    ['site/login'],
+                    [
+                        'class' => 'btn btn-primary',
+                        'encode' => false,
+                    ]
+            ) ?>
+            </div>
+            <?php else: ?>
+            <?= Html::a(
+                '<i class="bi bi-box-arrow-right"></i> Logout',
+                ['site/logout'],
+                [
+                    'class' => 'btn btn-danger',
+                    'data' => [
+                        'method' => 'POST',
+                        'confirm' => 'Are you sure you want to log out'
+                    ],
+                    'encode' => false,
+                ]
+            ) ?>
+
+
+            <?php endif; ?>
+            <?php if (!Yii::$app->user->isGuest): ?> <div class="">
+
+                <?php
+                $user = Yii::$app->user->identity;
+
+                $initials = strtoupper(
+                    substr($user->first_name ?? '', 0, 1) .
+                    substr($user->last_name ?? '', 0, 1)
+                );
+
+                $image = !empty($user->profile_image)
+                    ? 'data:image/jpeg;base64,' . $user->profile_image
+                    : null;
+                ?>
+
+                <?php if ($image): ?>
+
+                <?= Html::img($image, [
+                        'class' => 'rounded-circle',
+                        'width' => 40,
+                        'height' => 40,
+                        'alt' => $user->username,
+                    ]) ?>
+
+                <?php else: ?>
+
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                    style="width:40px; height:40px;">
+                    <?= $initials ?>
+                </div>
+
+                <?php endif; ?>
+                <span class="ms-2">
+                    <?= $user->first_name . ' ' . $user->last_name ?>
+                </span>
+            </div>
+
+
+            <?php endif; ?>
 
             <?= Html::button(
                 '&#127769;',

@@ -17,7 +17,7 @@ use Yii;
 class Posts extends \yii\db\ActiveRecord
 {
 
-
+ public $comments_count;
     /**
      * {@inheritdoc}
      */
@@ -55,5 +55,18 @@ class Posts extends \yii\db\ActiveRecord
             'images' => 'Images',
         ];
     }
+
+    public function getComments()
+        {
+            return $this->hasMany(
+                Comments::class,
+                [
+                    'post_id'=>'id'
+                ]
+            );
+        }
+
+
+
 
 }

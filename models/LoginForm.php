@@ -52,7 +52,7 @@ class LoginForm extends Model
         if (!$this->hasErrors()) {
             $user = $this->getUser();
 
-            if (!$user || !$this->security->validatePassword($this->password, $user->passwordHash)) {
+            if (!$user || !$this->security->validatePassword($this->password, $user->password_hash)) {
                 $this->addError($attribute, 'Incorrect username or password.');
             }
         }
@@ -62,10 +62,19 @@ class LoginForm extends Model
      * Logs in a user using the provided username and password.
      * @return bool whether the user is logged in successfully
      */
-    public function login(): bool
+   public function login(): bool
     {
         if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
+
+            $user = $this->getUser();
+
+            $user->last_login_at = date('Y-m-d H:i:s');
+            $user->save(false);
+
+            return Yii::$app->user->login(
+                $user,
+                $this->rememberMe ? 3600 * 24 * 30 : 0
+            );
         }
 
         return false;
